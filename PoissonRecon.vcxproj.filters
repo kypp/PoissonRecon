@@ -53,9 +53,6 @@
     <ClInclude Include="Src\Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Hash.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\MarchingCubes.h">
       <Filter>Header Files</Filter>
     </ClInclude>

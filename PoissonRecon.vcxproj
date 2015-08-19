@@ -196,7 +196,6 @@
     <ClInclude Include="Src\CmdLineParser.h" />
     <ClInclude Include="Src\Factor.h" />
     <ClInclude Include="Src\Geometry.h" />
-    <ClInclude Include="Src\Hash.h" />
     <ClInclude Include="Src\MarchingCubes.h" />
     <ClInclude Include="Src\MAT.h" />
     <ClInclude Include="Src\MemoryUsage.h" />
