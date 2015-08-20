@@ -162,7 +162,7 @@ void cmdLineStrings::writeValue(char* str)
 }
 
 
-char* GetFileExtension(char* fileName){
+char* GetFileExtension(const char* fileName){
 	char* fileNameCopy;
 	char* ext=NULL;
 	char* temp;

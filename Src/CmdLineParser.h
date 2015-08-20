@@ -112,7 +112,7 @@ public:
 // the values of "r" appropriately. Parameters start with "--"
 void cmdLineParse(int argc, char **argv,int num,cmdLineReadable** r,int dumpError=1);
 
-char* GetFileExtension(char* fileName);
+char* GetFileExtension(const char* fileName);
 char* GetLocalFileName(char* fileName);
 char** ReadWords(const char* fileName,int& cnt);
 

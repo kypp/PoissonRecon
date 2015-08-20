@@ -3,4 +3,6 @@
 /Obj/
 /Debug/
 /Bin/
+/Lib/
 *.opensdf
+*.vcxproj.user
