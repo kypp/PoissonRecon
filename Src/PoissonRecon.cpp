@@ -45,6 +45,9 @@ DAMAGE.
 #ifdef _OPENMP
 #include "omp.h"
 #endif // _OPENMP
+
+using namespace poisson_recon;
+
 void DumpOutput( const char* format , ... );
 #include "MultiGridOctreeData.h"
 void DumpOutput2( std::vector< char* >& comments , const char* format , ... );
@@ -127,7 +130,7 @@ PlyProperty PlyColorProperties[]=
 bool ValidPlyColorProperties( const bool* props ){ return ( props[0] || props[3] ) && ( props[1] || props[4] ) && ( props[2] || props[5] ); }
 
 template< class Real , class Vertex >
-int Execute(const poisson::PoissonReconParameters & parameters)
+int Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
 {
 	// reset the static variables (could unstaticize them)
 	Reset< Real >();
@@ -173,15 +176,9 @@ int Execute(const poisson::PoissonReconParameters & parameters)
 	typedef typename Octree< Real >::template ProjectiveData< Point3D< Real > > ProjectiveColor;
 	typename Octree< Real >::template SparseNodeData< ProjectiveColor > colorData;
 
-	char* ext = GetFileExtension( parameters.input_file.c_str() );
 	if( parameters.color.set() && *parameters.color > 0 )
 	{
-		OrientedPointStreamWithData< float , Point3D< unsigned char > >* pointStream;
-		if     ( !strcasecmp( ext , "bnpts" ) ) pointStream = new BinaryOrientedPointStreamWithData< float , Point3D< unsigned char > >( parameters.input_file.c_str() );
-		else if( !strcasecmp( ext , "ply"   ) ) pointStream = new    PLYOrientedPointStreamWithData< float , Point3D< unsigned char > >(parameters.input_file.c_str(), PlyColorProperties , 6 , ValidPlyColorProperties );
-		else                                    pointStream = new  ASCIIOrientedPointStreamWithData< float , Point3D< unsigned char > >(parameters.input_file.c_str(), ReadASCIIColor );
-		pointCount = tree.template SetTree< float >( pointStream , parameters.minDepth, parameters.depth , parameters.fullDepth, kernelDepth , Real(parameters.samplesPerNode) , parameters.scale , parameters.confidence , parameters.normalWeights , parameters.pointWeight, parameters.adaptiveExponent, *kernelDensityWeights , *pointInfo , *normalInfo , *centerWeights , colorData , xForm , parameters.boundaryType , parameters.complete);
-		delete pointStream;
+		pointCount = tree.template SetTree< float >( parameters.pointStreamWithData , parameters.minDepth, parameters.depth , parameters.fullDepth, kernelDepth , Real(parameters.samplesPerNode) , parameters.scale , parameters.confidence , parameters.normalWeights , parameters.pointWeight, parameters.adaptiveExponent, *kernelDensityWeights , *pointInfo , *normalInfo , *centerWeights , colorData , xForm , parameters.boundaryType , parameters.complete);
 
 		for( const OctNode< TreeNodeData >* n = tree.tree.nextNode() ; n!=NULL ; n=tree.tree.nextNode( n ) )
 		{
@@ -191,14 +188,8 @@ int Execute(const poisson::PoissonReconParameters & parameters)
 	}
 	else
 	{
-		OrientedPointStream< float >* pointStream;
-		if     ( !strcasecmp( ext , "bnpts" ) ) pointStream = new BinaryOrientedPointStream< float >(parameters.input_file.c_str());
-		else if( !strcasecmp( ext , "ply"   ) ) pointStream = new    PLYOrientedPointStream< float >(parameters.input_file.c_str());
-		else                                    pointStream = new  ASCIIOrientedPointStream< float >(parameters.input_file.c_str());
-		pointCount = tree.template SetTree< float >( pointStream , parameters.minDepth , parameters.depth , parameters.fullDepth , kernelDepth , Real(parameters.samplesPerNode) , parameters.scale , parameters.confidence , parameters.normalWeights , parameters.pointWeight , parameters.adaptiveExponent , *kernelDensityWeights , *pointInfo , *normalInfo , *centerWeights , xForm , parameters.boundaryType , parameters.complete );
-		delete pointStream;
+		pointCount = tree.template SetTree< float >( parameters.pointStream , parameters.minDepth , parameters.depth , parameters.fullDepth , kernelDepth , Real(parameters.samplesPerNode) , parameters.scale , parameters.confidence , parameters.normalWeights , parameters.pointWeight , parameters.adaptiveExponent , *kernelDensityWeights , *pointInfo , *normalInfo , *centerWeights , xForm , parameters.boundaryType , parameters.complete );
 	}
-	delete[] ext;
 	if( !parameters.density ) delete kernelDensityWeights , kernelDensityWeights = NULL;
 
 	DumpOutput2( comments , "#             Tree set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
@@ -222,8 +213,6 @@ int Execute(const poisson::PoissonReconParameters & parameters)
 	DumpOutput2( comments , "# Linear system solved in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
 	DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
 	maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-
-	CoredFileMeshData< Vertex > mesh;
 
 	if( parameters.verbose ) tree.maxMemoryUsage=0;
 	t=Time();
@@ -255,29 +244,27 @@ int Execute(const poisson::PoissonReconParameters & parameters)
 		}
 		DumpOutput( "Got voxel grid in: %f\n" , Time()-t );
 	}
+	
+	t = Time() , tree.maxMemoryUsage = 0;
+	tree.GetMCIsoSurface( kernelDensityWeights ? GetPointer( *kernelDensityWeights ) : NullPointer( Real ) , parameters.color.set() ? &colorData : NULL , solution , isoValue , mesh , true , !parameters.nonManifold , parameters.polygonMesh );
+	if( parameters.polygonMesh ) DumpOutput2( comments , "#         Got polygons in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+	else                  DumpOutput2( comments , "#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+	maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
+	DumpOutput2( comments , "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
 
-	if( parameters.output_file.set() )
-	{
-		t = Time() , tree.maxMemoryUsage = 0;
-		tree.GetMCIsoSurface( kernelDensityWeights ? GetPointer( *kernelDensityWeights ) : NullPointer( Real ) , parameters.color.set() ? &colorData : NULL , solution , isoValue , mesh , true , !parameters.nonManifold , parameters.polygonMesh );
-		if( parameters.polygonMesh ) DumpOutput2( comments , "#         Got polygons in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-		else                  DumpOutput2( comments , "#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-		maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-		DumpOutput2( comments , "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
+	//auto output_file = const_cast<char *>(parameters.output_file->c_str());
+	//if( parameters.noComments )
+	//{
+	//	if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , NULL , 0 , iXForm );
+	//	else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , NULL , 0 , iXForm );
+	//}
+	//else
+	//{
+	//	if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , &comments[0] , (int)comments.size() , iXForm );
+	//	else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , &comments[0] , (int)comments.size() , iXForm );
+	//}
+	//DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
 
-		auto output_file = const_cast<char *>(parameters.output_file->c_str());
-		if( parameters.noComments )
-		{
-			if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , NULL , 0 , iXForm );
-			else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , NULL , 0 , iXForm );
-		}
-		else
-		{
-			if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , &comments[0] , (int)comments.size() , iXForm );
-			else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , &comments[0] , (int)comments.size() , iXForm );
-		}
-		DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
-	}
 	FreePointer( solution );
 	return 1;
 }
@@ -292,7 +279,11 @@ inline double to_seconds( const FILETIME& ft )
 #endif // _WIN32
 
 
-int poisson::performReconstruction(const poisson::PoissonReconParameters & parameters)
+template int poisson_recon::performReconstruction<float, PlyColorVertex<float>>(const PoissonReconParameters & parameters, CoredVectorMeshData< PlyColorVertex<float> >& mesh);
+
+
+template<class Real, class Vertex>
+int poisson_recon::performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
 {
 #if defined(WIN32) && defined(MAX_MEMORY_GB)
 	if( MAX_MEMORY_GB>0 )
@@ -313,20 +304,23 @@ int poisson::performReconstruction(const poisson::PoissonReconParameters & param
 #endif // defined(WIN32) && defined(MAX_MEMORY_GB)
 	double t = Time();
 
-	if( parameters.density )
-		if( parameters.color.set() )
-			if( parameters.double_precision ) Execute< double , PlyColorAndValueVertex< float > >(parameters);
-			else             Execute< float  , PlyColorAndValueVertex< float > >(parameters);
-		else
-			if(parameters.double_precision) Execute< double , PlyValueVertex< float > >(parameters);
-			else             Execute< float  , PlyValueVertex< float > >(parameters);
-	else
-		if(parameters.color.set())
-			if(parameters.double_precision) Execute< double , PlyColorVertex< float > >(parameters);
-			else             Execute< float  , PlyColorVertex< float > >(parameters);
-		else
-			if(parameters.double_precision) Execute< double , PlyVertex< float > >(parameters);
-			else             Execute< float  , PlyVertex< float > >(parameters);
+//	if( parameters.density )
+//		if( parameters.color.set() )
+//			if( parameters.double_precision ) Execute< double , PlyColorAndValueVertex< float > >(parameters, mesh);
+//			else             Execute< float  , PlyColorAndValueVertex< float > >(parameters, mesh);
+//		else
+//			if(parameters.double_precision) Execute< double , PlyValueVertex< float > >(parameters, mesh);
+//			else             Execute< float  , PlyValueVertex< float > >(parameters, mesh);
+//	else
+//		if(parameters.color.set())
+//			if(parameters.double_precision) Execute< double , PlyColorVertex< float > >(parameters, mesh);
+//			else             Execute< float  , PlyColorVertex< float > >(parameters, mesh);
+//		else
+//			if(parameters.double_precision) Execute< double , PlyVertex< float > >(parameters, mesh);
+//			else             Execute< float  , PlyVertex< float > >(parameters, mesh);
+	printf("befor execute\n");
+	Execute< Real, Vertex >(parameters, mesh);
+
 #ifdef _WIN32
 	if(parameters.performance)
 	{
@@ -343,7 +337,7 @@ int poisson::performReconstruction(const poisson::PoissonReconParameters & param
 	return EXIT_SUCCESS;
 }
 
-int poisson::getDefaultThreadsCount()
+int poisson_recon::getDefaultThreadsCount()
 {
 	return omp_get_num_procs();
 }

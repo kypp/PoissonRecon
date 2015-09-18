@@ -14,4 +14,4 @@ endif(USE_OPENMP)
 include_directories (include Src)
 add_subdirectory (Src)
 
-install (DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "*.inl")

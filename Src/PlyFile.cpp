@@ -38,6 +38,8 @@
 #include <string.h>
 #include "Ply.h"
 
+using namespace poisson_recon;
+
 const char *type_names[] = {
 	"invalid",
 	"char",

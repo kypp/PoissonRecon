@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace poisson {
+namespace poisson_recon {
 
 	template <typename T>
 	class OptionalParameter {
@@ -35,9 +35,15 @@ namespace poisson {
 
 	int getDefaultThreadsCount();
 
-	struct PoissonReconParameters {
-		std::string input_file;
-		OptionalParameter<std::string> output_file;
+	struct PoissonReconParameters 
+	{
+		//std::string input_file;
+		//OptionalParameter<std::string> output_file;
+		
+		OrientedPointStreamWithData< float, Point3D< unsigned char > >* pointStreamWithData;
+		OrientedPointStream< float >* pointStream;
+
+
 		OptionalParameter<std::string> voxel_grid_file;
 
 		bool double_precision{ false };
@@ -72,5 +78,6 @@ namespace poisson {
 		float pointWeight{ 4.f };
 	};
 
-	int performReconstruction(const PoissonReconParameters & parameters);
+	template<class Real, class Vertex>
+	int performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex >& mesh);
 }

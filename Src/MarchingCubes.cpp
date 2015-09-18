@@ -28,6 +28,8 @@ DAMAGE.
 #include <math.h>
 #include "MarchingCubes.h"
 
+using namespace poisson_recon;
+
 ////////////
 // Square //
 ////////////

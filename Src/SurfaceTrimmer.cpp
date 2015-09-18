@@ -39,6 +39,8 @@ DAMAGE.
 #include "MAT.h"
 #include "MyTime.h"
 
+using namespace poisson_recon;
+
 cmdLineString In( "in" ) , Out( "out" );
 cmdLineInt Smooth( "smooth" , 5 );
 cmdLineFloat Trim( "trim" ) , IslandAreaRatio( "aRatio" , 0.001f );

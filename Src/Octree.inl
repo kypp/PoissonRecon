@@ -30,6 +30,8 @@ DAMAGE.
 #include <math.h>
 #include <algorithm>
 
+namespace poisson_recon {
+
 /////////////
 // OctNode //
 /////////////
@@ -2346,4 +2348,6 @@ void OctNode< NodeData >::centerIndex(int maxDepth,int index[DIMENSION]) const
 	int d,o[3];
 	depthAndOffset(d,o);
 	for(int i=0;i<DIMENSION;i++) index[i]=BinaryNode::CornerIndex( maxDepth , d+1 , o[i]<<1 , 1 );
+}
+
 }

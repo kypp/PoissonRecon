@@ -29,20 +29,22 @@ DAMAGE.
 #define MAT_INCLUDED
 #include "Geometry.h"
 
-template <class Real>
-class MinimalAreaTriangulation
-{
-	Real* bestTriangulation;
-	int* midPoint;
-	Real GetArea(const size_t& i,const size_t& j,const std::vector<Point3D<Real> >& vertices);
-	void GetTriangulation(const size_t& i,const size_t& j,const std::vector<Point3D<Real> >& vertices,std::vector<TriangleIndex>& triangles);
-public:
-	MinimalAreaTriangulation(void);
-	~MinimalAreaTriangulation(void);
-	Real GetArea(const std::vector<Point3D<Real> >& vertices);
-	void GetTriangulation(const std::vector<Point3D<Real> >& vertices,std::vector<TriangleIndex>& triangles);
-};
+namespace poisson_recon {
 
+	template <class Real>
+	class MinimalAreaTriangulation
+	{
+		Real* bestTriangulation;
+		int* midPoint;
+		Real GetArea(const size_t& i, const size_t& j, const std::vector<Point3D<Real> >& vertices);
+		void GetTriangulation(const size_t& i, const size_t& j, const std::vector<Point3D<Real> >& vertices, std::vector<TriangleIndex>& triangles);
+	public:
+		MinimalAreaTriangulation(void);
+		~MinimalAreaTriangulation(void);
+		Real GetArea(const std::vector<Point3D<Real> >& vertices);
+		void GetTriangulation(const std::vector<Point3D<Real> >& vertices, std::vector<TriangleIndex>& triangles);
+	};
+}
 #include "MAT.inl"
 
 #endif // MAT_INCLUDED

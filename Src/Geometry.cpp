@@ -32,6 +32,8 @@ DAMAGE.
 #include <io.h>
 #endif // _WIN32
 
+using namespace poisson_recon;
+
 ///////////////////
 // CoredMeshData //
 ///////////////////
