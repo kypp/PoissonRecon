@@ -187,6 +187,14 @@ void Triangulate( const std::vector< Vertex >& vertices , const std::vector< std
 		}
 		else if( polygons[i].size()==3 ) triangles.push_back( polygons[i] );
 }
+template< class Real >
+inline Point3D< Real > CrossProduct( Point3D< Real > p1 , Point3D< Real > p2 ){ return Point3D< Real >( p1[1]*p2[2]-p1[2]*p2[1] , p1[2]*p2[0]-p1[0]*p2[2] , p1[0]*p1[1]-p1[1]*p2[0] ); }
+template< class Real >
+double TriangleArea( Point3D< Real > v1 , Point3D< Real > v2 , Point3D< Real > v3 )
+{
+	Point3D< Real > n = CrossProduct( v2-v1 , v3-v1 );
+	return sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) / 2.;
+}
 template< class Real , class Vertex >
 double PolygonArea( const std::vector< Vertex >& vertices , const std::vector< int >& polygon )
 {
@@ -263,14 +271,6 @@ void SetConnectedComponents( const std::vector< std::vector< int > >& polygons ,
 	for( int i= 0 ; i<int(polygonRoots.size()) ; i++ ) if( polygonRoots[i]==i ) vMap[i] = cCount++;
 	components.resize( cCount );
 	for( int i=0 ; i<int(polygonRoots.size()) ; i++ ) components[ vMap[ polygonRoots[i] ] ].push_back(i);
-}
-template< class Real >
-inline Point3D< Real > CrossProduct( Point3D< Real > p1 , Point3D< Real > p2 ){ return Point3D< Real >( p1[1]*p2[2]-p1[2]*p2[1] , p1[2]*p2[0]-p1[0]*p2[2] , p1[0]*p1[1]-p1[1]*p2[0] ); }
-template< class Real >
-double TriangleArea( Point3D< Real > v1 , Point3D< Real > v2 , Point3D< Real > v3 )
-{
-	Point3D< Real > n = CrossProduct( v2-v1 , v3-v1 );
-	return sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) / 2.;
 }
 template< class Vertex >
 int Execute( void )

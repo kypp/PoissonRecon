@@ -6,3 +6,4 @@
 /Lib/
 *.opensdf
 *.vcxproj.user
+build/
