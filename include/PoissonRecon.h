@@ -58,7 +58,11 @@ namespace poisson_recon {
 		bool density{ false };
 		bool verbose{ false };
 		bool ASCII{ false };
+		bool dirichlet{ false };
+		bool linearFit{ false };
+		bool primalVoxel{ false };
 
+		int splineDegree{ 2 };
 		int depth{ 8 };
 		int cgDepth{ 0 };
 		OptionalParameter<int> kernelDepth;
@@ -68,7 +72,6 @@ namespace poisson_recon {
 		int fullDepth{ 5 };
 		int minDepth{ 0 };
 		OptionalParameter<int> maxSolveDepth;
-		int boundaryType{ 1 };
 		int threads{ getDefaultThreadsCount() };
 
 		OptionalParameter<float> color; // 16
