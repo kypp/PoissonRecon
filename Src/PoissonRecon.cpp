@@ -235,7 +235,7 @@ int _Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Ver
 	maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
 
 	t=Time() , tree.maxMemoryUsage=0;
-	DenseNodeData< Real , Degree > solution = tree.SolveSystem( *pointInfo , constraints , parameters.showResidual , parameters.iters , *parameters.maxSolveDepth , parameters.cgDepth, parameters.csSolverAccuracy );
+	DenseNodeData< Real , Degree > solution = tree.SolveSystem( *pointInfo , constraints , parameters.showResidual , parameters.iters , maxSolveDepth , parameters.cgDepth, parameters.csSolverAccuracy );
 	delete pointInfo;
 	constraints.resize( 0 );
 
