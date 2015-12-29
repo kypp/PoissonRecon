@@ -129,21 +129,6 @@ PlyProperty PlyColorProperties[]=
 
 bool ValidPlyColorProperties( const bool* props ){ return ( props[0] || props[3] ) && ( props[1] || props[4] ) && ( props[2] || props[5] ); }
 
-template< class Real, class Vertex >
-int Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
-{
-	switch( parameters.splineDegree )
-	{
-	case 1: return _Execute< Real , 1 , Vertex >( parameters , mesh );
-	case 2: return _Execute< Real , 2 , Vertex >( parameters , mesh );
-	case 3: return _Execute< Real , 3 , Vertex >( parameters , mesh );
-	case 4: return _Execute< Real , 4 , Vertex >( parameters , mesh );
-	default:
-		fprintf( stderr , "[ERROR] Only B-Splines of degree 1 - 4 are supported" );
-		return EXIT_FAILURE;
-	}
-}
-
 template< class Real, int Degree, class Vertex >
 int _Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
 {
@@ -297,6 +282,21 @@ int _Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Ver
 	solution.resize( 0 );
 	if( colorData ){ delete colorData ; colorData = NULL; }
 	return 1;
+}
+
+template< class Real, class Vertex >
+int Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
+{
+	switch( parameters.splineDegree )
+	{
+	case 1: return _Execute< Real , 1 , Vertex >( parameters , mesh );
+	case 2: return _Execute< Real , 2 , Vertex >( parameters , mesh );
+	case 3: return _Execute< Real , 3 , Vertex >( parameters , mesh );
+	case 4: return _Execute< Real , 4 , Vertex >( parameters , mesh );
+	default:
+		fprintf( stderr , "[ERROR] Only B-Splines of degree 1 - 4 are supported" );
+		return EXIT_FAILURE;
+	}
 }
 
 #ifdef _WIN32

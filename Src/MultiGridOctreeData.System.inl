@@ -1371,6 +1371,7 @@ DenseNodeData< Real , FEMDegree > Octree< Real >::SetLaplacianConstraints( const
 					{
 						int _idx = normalInfo.index( _node );
 						if( _idx>=0 ) 
+						{
 							if( isInterior ) constraints[i] += Point3D< Real >::Dot( stencil.values[x][y][z] , normalInfo.data[ _idx ] );
 							else
 							{
@@ -1378,6 +1379,7 @@ DenseNodeData< Real , FEMDegree > Octree< Real >::SetLaplacianConstraints( const
 								_node->depthAndOffset( _d , _off );
 								constraints[i] += Real( SystemCoefficients< NormalDegree , FEMDegree >::GetDivergence2( integrator , _off , off , normalInfo.data[ _idx ] ) );
 							}
+						}
 					}
 				}
 				_SetParentOverlapBounds< NormalDegree , FEMDegree >( node , startX , endX , startY , endY , startZ , endZ );
