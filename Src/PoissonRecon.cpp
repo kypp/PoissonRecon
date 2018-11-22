@@ -308,62 +308,10 @@ inline double to_seconds( const FILETIME& ft )
 }
 #endif // _WIN32
 
-
-template int poisson_recon::performReconstruction<float, PlyColorVertex<float>>(const PoissonReconParameters & parameters, CoredVectorMeshData< PlyColorVertex<float> >& mesh);
-
-
-template<class Real, class Vertex>
-int poisson_recon::performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex>& mesh)
+int poisson_recon::performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData<poisson_recon::PlyColorVertex<float>>& mesh)
 {
-#if defined(WIN32) && defined(MAX_MEMORY_GB)
-	if( MAX_MEMORY_GB>0 )
-	{
-		SIZE_T peakMemory = 1;
-		peakMemory <<= 30;
-		peakMemory *= MAX_MEMORY_GB;
-		printf( "Limiting memory usage to %.2f GB\n" , float( peakMemory>>30 ) );
-		HANDLE h = CreateJobObject( NULL , NULL );
-		AssignProcessToJobObject( h , GetCurrentProcess() );
+	Execute<float, PlyColorVertex<float>>(parameters, mesh);
 
-		JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
-		jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_JOB_MEMORY;
-		jeli.JobMemoryLimit = peakMemory;
-		if( !SetInformationJobObject( h , JobObjectExtendedLimitInformation , &jeli , sizeof( jeli ) ) )
-			fprintf( stderr , "Failed to set memory limit\n" );
-	}
-#endif // defined(WIN32) && defined(MAX_MEMORY_GB)
-	double t = Time();
-
-//	if( parameters.density )
-//		if( parameters.color.set() )
-//			if( parameters.double_precision ) Execute< double , PlyColorAndValueVertex< float > >(parameters, mesh);
-//			else             Execute< float  , PlyColorAndValueVertex< float > >(parameters, mesh);
-//		else
-//			if(parameters.double_precision) Execute< double , PlyValueVertex< float > >(parameters, mesh);
-//			else             Execute< float  , PlyValueVertex< float > >(parameters, mesh);
-//	else
-//		if(parameters.color.set())
-//			if(parameters.double_precision) Execute< double , PlyColorVertex< float > >(parameters, mesh);
-//			else             Execute< float  , PlyColorVertex< float > >(parameters, mesh);
-//		else
-//			if(parameters.double_precision) Execute< double , PlyVertex< float > >(parameters, mesh);
-//			else             Execute< float  , PlyVertex< float > >(parameters, mesh);
-	printf("befor execute\n");
-	Execute< Real, Vertex >(parameters, mesh);
-
-#ifdef _WIN32
-	if(parameters.performance)
-	{
-		HANDLE cur_thread=GetCurrentThread();
-		FILETIME tcreat, texit, tkernel, tuser;
-		if( GetThreadTimes( cur_thread , &tcreat , &texit , &tkernel , &tuser ) )
-			printf( "Time (Wall/User/Kernel): %.2f / %.2f / %.2f\n" , Time()-t , to_seconds( tuser ) , to_seconds( tkernel ) );
-		else printf( "Time: %.2f\n" , Time()-t );
-		HANDLE h = GetCurrentProcess();
-		PROCESS_MEMORY_COUNTERS pmc;
-		if( GetProcessMemoryInfo( h , &pmc , sizeof(pmc) ) ) printf( "Peak Memory (MB): %d\n" , pmc.PeakWorkingSetSize>>20 );
-	}
-#endif // _WIN32
 	return EXIT_SUCCESS;
 }
 

@@ -81,6 +81,5 @@ namespace poisson_recon {
 		float pointWeight{ 4.f };
 	};
 
-	template<class Real, class Vertex>
-	int performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData< Vertex >& mesh);
+	int performReconstruction(const PoissonReconParameters & parameters, CoredVectorMeshData<PlyColorVertex<float>>& mesh);
 }
