@@ -266,19 +266,6 @@ int _Execute(const PoissonReconParameters & parameters, CoredVectorMeshData< Ver
 	maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
 	DumpOutput2( comments , "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
 
-	//auto output_file = const_cast<char *>(parameters.output_file->c_str());
-	//if( parameters.noComments )
-	//{
-	//	if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , NULL , 0 , iXForm );
-	//	else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , NULL , 0 , iXForm );
-	//}
-	//else
-	//{
-	//	if(parameters.ASCII) PlyWritePolygons(output_file, &mesh , PLY_ASCII         , &comments[0] , (int)comments.size() , iXForm );
-	//	else            PlyWritePolygons(output_file, &mesh , PLY_BINARY_NATIVE , &comments[0] , (int)comments.size() , iXForm );
-	//}
-	//DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
-
 	solution.resize( 0 );
 	if( colorData ){ delete colorData ; colorData = NULL; }
 	return 1;

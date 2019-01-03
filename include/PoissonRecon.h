@@ -1,50 +1,20 @@
 #pragma once
 #include <string>
+#include <optional>
+#include "Geometry.h"
+#include "Ply.h"
 
 namespace poisson_recon {
-
-	template <typename T>
-	class OptionalParameter {
-	public:
-		OptionalParameter() = default;
-
-		OptionalParameter(T parameter) : is_set{ true }, parameter{ parameter }
-		{}
-
-		OptionalParameter & operator = (T new_value) {
-			is_set = true;
-			parameter = new_value;
-			return *this;
-		}
-
-		T operator * () const {
-			return parameter;
-		}
-
-		const T* operator -> () const {
-			return &parameter;
-		}
-
-		bool set() const {
-			return is_set;
-		}
-	private:
-		bool is_set{ false };
-		T parameter{};
-	};
 
 	int getDefaultThreadsCount();
 
 	struct PoissonReconParameters 
 	{
-		//std::string input_file;
-		//OptionalParameter<std::string> output_file;
-		
 		OrientedPointStreamWithData< float, Point3D< unsigned char > >* pointStreamWithData;
 		OrientedPointStream< float >* pointStream;
 
 
-		OptionalParameter<std::string> voxel_grid_file;
+		std::optional<std::string> voxel_grid_file;
 
 		bool double_precision{ false };
 		bool performance{ false };
@@ -65,16 +35,16 @@ namespace poisson_recon {
 		int splineDegree{ 2 };
 		int depth{ 8 };
 		int cgDepth{ 0 };
-		OptionalParameter<int> kernelDepth;
+		std::optional<int> kernelDepth;
 		int adaptiveExponent{ 1 };
 		int iters{ 8 };
 		int voxelDepth{ -1 };
 		int fullDepth{ 5 };
 		int minDepth{ 0 };
-		OptionalParameter<int> maxSolveDepth;
+		std::optional<int> maxSolveDepth;
 		int threads{ getDefaultThreadsCount() };
 
-		OptionalParameter<float> color; // 16
+		std::optional<float> color; // 16
 		float samplesPerNode{ 1.5f };
 		float scale{ 1.1f };
 		float csSolverAccuracy{ float(1e-3) };
